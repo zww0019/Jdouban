@@ -1,5 +1,6 @@
-package team.ngup.douban.common;
+package team.ngup.douban.common.http;
 
+import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -28,7 +29,7 @@ public class HttpClientUtils {
 	private static final String ENCODING = "UTF-8";
 
 	// 设置连接超时时间，单位毫秒。
-	private static final int CONNECT_TIMEOUT = 10000;
+	private static final int CONNECT_TIMEOUT = 20000;
 
 	// 请求获取数据的超时时间(即响应时间)，单位毫秒。
 	private static final int SOCKET_TIMEOUT = 20000;
@@ -279,6 +280,12 @@ public class HttpClientUtils {
 		}
 	}
 
+	private static String cookie;
+
+	public static String getCookie() {
+		return cookie;
+	}
+
 	/**
 	 * Description: 获得响应结果
 	 *
@@ -292,7 +299,11 @@ public class HttpClientUtils {
 			CloseableHttpClient httpClient, HttpRequestBase httpMethod) throws IOException {
 		// 执行请求
 		httpResponse = httpClient.execute(httpMethod);
-
+		for (Header header : httpResponse.getAllHeaders()) {
+			if ("Set-Cookie".equals(header.getName())) {
+				cookie = header.getValue();
+			}
+		}
 		// 获取返回结果
 		if (httpResponse != null && httpResponse.getStatusLine() != null) {
 			String content = "";

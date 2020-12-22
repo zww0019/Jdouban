@@ -1,4 +1,4 @@
-package team.ngup.douban.common;
+package team.ngup.douban.common.http;
 
 import java.io.Serializable;
 
