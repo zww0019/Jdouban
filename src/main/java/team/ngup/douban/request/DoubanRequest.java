@@ -1,6 +1,7 @@
 package team.ngup.douban.request;
 
 import com.alibaba.fastjson.JSONObject;
+import team.ngup.douban.common.COLLECT_EVENT_TYPE;
 import team.ngup.douban.common.http.HttpClientResult;
 import team.ngup.douban.common.http.HttpClientUtils;
 
@@ -75,6 +76,33 @@ public class DoubanRequest {
         return JSONObject.parseObject(result.getContent());
     }
 
+    public static void promo(String id) throws IOException, URISyntaxException {
+        headers.put("Cookie", cookie);
+        System.out.println("提：" + HttpClientUtils.doGet("https://fm.douban.com/j/v2/song/" + id + "/promo", headers, new HashMap<>()).getContent());
+    }
+
+    public static void collect_event(COLLECT_EVENT_TYPE collect_event_type) throws IOException {
+        headers.put("Cookie", cookie);
+        Map<String, String> params = new HashMap<>();
+        params.put("category", "fullplayer");
+        params.put("action", collect_event_type.getStr());
+        params.put("label", "");
+        params.put("value", "");
+        String[] items = cookie.split(";");
+        String ck = "";
+        for (String item : items) {
+            if (item.contains("ck=")) {
+                String temp[] = item.split("=");
+                if (temp.length > 1) {
+                    ck = temp[1];
+                }
+                break;
+            }
+        }
+        params.put("ck", ck);
+        System.out.println("收：" + HttpClientUtils.doPost("https://fm.douban.com/j/v2/collect_event", headers, params).getContent());
+    }
+
     public static boolean isLogined(String code) throws IOException, URISyntaxException {
         //headers.put("Origin", "https://accounts.douban.com");
         headers.put("Cookie", cookie);
@@ -93,7 +121,4 @@ public class DoubanRequest {
         return false;
     }
 
-    public static void main(String[] args) throws IOException {
-        new DoubanRequest().getQr();
-    }
 }
