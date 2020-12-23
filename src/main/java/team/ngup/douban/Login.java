@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
@@ -15,10 +16,18 @@ import team.ngup.douban.common.http.HttpClientUtils;
 import team.ngup.douban.request.DoubanRequest;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author zhangwenwu
@@ -26,128 +35,177 @@ import java.util.Map;
 public class Login {
 
     private JPanel loginPanel;
+    private JButton loginBtn;
     private JLabel loginStatus;
-    private boolean isLogined = false;
+    private static volatile AtomicBoolean isLogined = new AtomicBoolean(false);
 
 
-    public static void main(String[] args) throws IOException {
-        JFrame frame = new JFrame("Login");
-        DoubanRequest doubanRequest = new DoubanRequest();
-        JSONObject response = doubanRequest.getQr();
-        String picUrl = response.getString("img");
-        Login login = new Login();
-
-        //login.erweima.setText("<html><img src='"+picUrl+"'></img></html>");
-        frame.setContentPane(login.loginPanel);
-        frame.add(new LinkLabel("加载二维码以登陆", picUrl, new LoginCallback() {
+    public Login() {
+        loginBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void execute() {
-                boolean isPending = true;
-                while (isPending) {
-                    try {
-                        Thread.sleep(2000);
-                        String code = response.getString("code");
-                        Map<String, String> headers = new HashMap<>();
-                        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36");
-                        headers.put("Content-Type", "application/x-www-form-urlencoded");
-                        headers.put("Accept", "application/json");
-                        headers.put("Origin", "https://accounts.douban.com");
-                        Map<String, String> params = new HashMap<>();
-                        params.put("ck", "");
-                        params.put("code", code);
-                        HttpClientResult result = HttpClientUtils.doGet("https://accounts.douban.com/j/mobile/login/qrlogin_status", headers, params);
-                        if (result.getCode() == 200) {
-                            JSONObject resultObject = JSONObject.parseObject(result.getContent());
-                            if ("success".equals(resultObject.getString("status"))) {
-                                if ("login".equals(resultObject.getJSONObject("payload").getString("login_status"))) {
-                                    isPending = false;
-                                    System.out.println("已登陆");
-                                    login.loginStatus.setText("已登陆");
-                                    login.loginStatus.setVisible(true);
-                                    login.isLogined = true;
-                                    System.out.println("正在获取用户信息");
-                                    new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                // 获取用户信息
-                                                JSONObject userInfo = doubanRequest.getUserInfo();
-                                                System.out.println(userInfo);
-                                                login.loginStatus.setText(userInfo.getString("name"));
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (!isLogined.get()) {
+                    /*try {*/
+                        new LoginStatusRealized().execute();
+                        /*JSONObject response = DoubanRequest.getQr();
+                        String picUrl = response.getString("img");
+                        Desktop.getDesktop().browse(new URL(picUrl).toURI());
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (isLogined) {
+                                    try {
+                                        while (!DoubanRequest.isLogined(response.getString("code"))) {
+                                            System.out.println("还未扫码登录");
+                                            Thread.sleep(2000);
                                         }
-                                    }).start();
-                                    new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                System.out.println("正在获取私人兆赫");
-                                                // 播放私人兆赫
-                                                JSONArray songs = doubanRequest.getSiRen().getJSONArray("song");
-                                                System.out.println(songs);
-                                                // Clip clip = AudioSystem.getClip();
-                                                // AudioInputStream inputStream = AudioSystem.getAudioInputStream(new URL(songs.getJSONObject(0).getString("url")));
-                                                //clip.open(inputStream);
-                                                //clip.start();
-//file you want to play
-                                               /* URL mediaURL = new URL(songs.getJSONObject(0).getString("url"));
-                                                Player mediaPlayer = Manager.createRealizedPlayer(mediaURL);
-                                                mediaPlayer.start();*/
-                                                /*Media m = new Media(songs.getJSONObject(0).getString("url"));
-                                                MediaPlayer player = new MediaPlayer(m);
-                                                player.play();*/
-                                                Media m = new Media(songs.getJSONObject(0).getString("url"));
-                                                MediaPlayer player = new MediaPlayer(m);
-                                                MediaView viewer = new MediaView(player);
-
-                                                StackPane root = new StackPane();
-                                                Scene scene = new Scene(root);
-
-                                                // center video position
-                                                javafx.geometry.Rectangle2D screen = Screen.getPrimary().getVisualBounds();
-                                                viewer.setX((screen.getWidth() - login.loginPanel.getWidth()) / 2);
-                                                viewer.setY((screen.getHeight() - login.loginPanel.getHeight()) / 2);
-
-                                                // resize video based on screen size
-                                                DoubleProperty width = viewer.fitWidthProperty();
-                                                DoubleProperty height = viewer.fitHeightProperty();
-                                                width.bind(Bindings.selectDouble(viewer.sceneProperty(), "width"));
-                                                height.bind(Bindings.selectDouble(viewer.sceneProperty(), "height"));
-                                                viewer.setPreserveRatio(true);
-
-                                                // add video to stackpane
-                                                root.getChildren().add(viewer);
-
-                                                /*VFXPanel.setScene(scene);
-                                                //player.play();
-                                                videoPanel.setLayout(new BorderLayout());
-                                                videoPanel.add(VFXPanel, BorderLayout.CENTER);*/
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    }).start();
-
-
-                                } else {
-                                    System.out.println("还未扫码登陆" + System.currentTimeMillis());
+                                        isLogined.set(true);
+                                        isLogined.notifyAll();
+                                    } catch (IOException | URISyntaxException | InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
+
                             }
-                        } else {
-                            isPending = false;
-                            System.err.println(result.getContent());
-                        }
-                    } catch (IOException | InterruptedException | URISyntaxException e) {
-                        e.printStackTrace();
-                    }
+                        }).start();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (isLogined) {
+                                    try {
+                                        isLogined.wait();
+                                        // 获取用户信息
+                                        JSONObject userInfo = DoubanRequest.getUserInfo();
+                                        System.out.println(userInfo);
+                                        //loginStatus.setText(userInfo.getString("name"));
+                                        // 利用EnventQueue类来更新Swing控件
+                                        EventQueue.invokeLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                loginStatus.setText(userInfo.getString("name"));
+                                            }
+                                        });
+                                    } catch (InterruptedException | IOException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
+
+                            }
+                        }).start();*/
+
+                    /*} catch (IOException | URISyntaxException e1) {
+                        e1.printStackTrace();
+                    }*/
                 }
             }
-        }));
+        });
+    }
 
+    public static void main(String[] args) throws IOException {
+
+        JFrame frame = new JFrame("Login");
+        Login login = new Login();
+        frame.setContentPane(login.loginPanel);
+        frame.add(login.loginStatus);
+        login.loginStatus.setText("暂未登录");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    synchronized (login.isLogined) {
+                        login.isLogined.wait();
+                        // 播放私人兆赫
+                        // System.out.println(songs);
+                        boolean findSi=true;
+                        while(findSi) {
+                            Thread.sleep(2000);
+                            JSONArray songs = DoubanRequest.getSiRen().getJSONArray("song");
+                            if (songs.size() > 0) {
+                                login.getVideo(songs.getJSONObject(0).getString("url"));
+                                findSi=false;
+                            } else {
+                                System.out.println("暂无");
+                            }
+                        }
+                    }
+                } catch (InterruptedException | IOException | URISyntaxException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }).start();
     }
+
+    public void getVideo(String url) {
+        final JFXPanel VFXPanel = new JFXPanel();
+
+        Media m = new Media(url);
+        MediaPlayer player = new MediaPlayer(m);
+        MediaView viewer = new MediaView(player);
+
+        StackPane root = new StackPane();
+        Scene scene = new Scene(root);
+
+        // center video position
+        javafx.geometry.Rectangle2D screen = Screen.getPrimary().getVisualBounds();
+        viewer.setX((screen.getWidth() - loginPanel.getWidth()) / 2);
+        viewer.setY((screen.getHeight() - loginPanel.getHeight()) / 2);
+/*        viewer.setX(0);
+        viewer.setY(0);*/
+        // resize video based on screen size
+        DoubleProperty width = viewer.fitWidthProperty();
+        DoubleProperty height = viewer.fitHeightProperty();
+        width.bind(Bindings.selectDouble(viewer.sceneProperty(), "width"));
+        height.bind(Bindings.selectDouble(viewer.sceneProperty(), "height"));
+        viewer.setPreserveRatio(true);
+
+        // add video to stackpane
+        root.getChildren().add(viewer);
+
+        VFXPanel.setScene(scene);
+        //System.out.println(player.getCurrentTime());
+        player.play();
+        loginPanel.setLayout(new BorderLayout());
+        loginPanel.add(VFXPanel, BorderLayout.CENTER);
+    }
+
+
+    class LoginStatusRealized extends SwingWorker<Void, JSONObject> {
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            JSONObject response = DoubanRequest.getQr();
+            String picUrl = response.getString("img");
+            Desktop.getDesktop().browse(new URL(picUrl).toURI());
+            try {
+                while (!DoubanRequest.isLogined(response.getString("code"))) {
+                    System.out.println("还未扫码登录");
+                    Thread.sleep(2000);
+                }
+                // 获取用户信息
+                JSONObject userInfo = DoubanRequest.getUserInfo();
+                System.out.println(userInfo);
+                publish(userInfo);
+                synchronized (isLogined){
+                    isLogined.set(true);
+                    isLogined.notify();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            /* }).start();*/
+
+            return null;
+        }
+
+        @Override
+        protected void process(List<JSONObject> chunks) {
+            loginStatus.setText(chunks.get(0).getString("name"));
+        }
+    }
+
+
 }

@@ -7,11 +7,16 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="b654b" class="javax.swing.JLabel" binding="loginStatus">
+      <component id="ccf91" class="javax.swing.JButton" binding="loginBtn">
+        <constraints/>
+        <properties>
+          <text value="点击扫码登录"/>
+        </properties>
+      </component>
+      <component id="2da07" class="javax.swing.JLabel" binding="loginStatus">
         <constraints/>
         <properties>
           <text value="Label"/>
-          <visible value="false"/>
         </properties>
       </component>
     </children>
