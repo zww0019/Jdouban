@@ -8,7 +8,7 @@ public class CookieUtil {
 
     private static Map<String,String> cookies = new ConcurrentHashMap<>();
 
-    public void addCookie(String cookie){
+    public static void addCookie(String cookie){
         String[] temp = cookie.split(";");
         for(String item:temp){
             String[] a = item.split("=");
@@ -20,7 +20,7 @@ public class CookieUtil {
         }
     }
 
-    public String getCookies(){
+    public static String getCookies(){
         StringBuilder stringBuilder = new StringBuilder();
         for(Map.Entry entry : cookies.entrySet()){
             stringBuilder.append(entry.getKey());

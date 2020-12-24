@@ -16,7 +16,8 @@
       <component id="2da07" class="javax.swing.JLabel" binding="loginStatus">
         <constraints/>
         <properties>
-          <text value="Label"/>
+          <horizontalAlignment value="10"/>
+          <text value=""/>
         </properties>
       </component>
     </children>

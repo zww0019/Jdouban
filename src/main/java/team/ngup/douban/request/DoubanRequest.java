@@ -1,12 +1,17 @@
 package team.ngup.douban.request;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import team.ngup.douban.common.COLLECT_EVENT_TYPE;
 import team.ngup.douban.common.http.HttpClientResult;
 import team.ngup.douban.common.http.HttpClientUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +66,7 @@ public class DoubanRequest {
         return JSONObject.parseObject(result.getContent());
     }
 
-    public static  JSONObject getSiRen() throws IOException, URISyntaxException {
+    public static  JSONObject getSiRen(String id,String type) throws IOException, URISyntaxException {
        // headers.put("Origin", "https://fm.douban.com");
         headers.put("Cookie", cookie);
         Map<String, String> params = new HashMap<>();
@@ -70,7 +75,15 @@ public class DoubanRequest {
         params.put("client", "s:mainsite|y:3.0");
         params.put("app_name", "radio_website");
         params.put("version", "100");
-        params.put("type", "n");
+        if(StringUtils.isNotEmpty(id)&&StringUtils.isNotEmpty(type)){
+            params.put("type",type);
+            params.put("sid",id);
+            params.put("pt","");
+            params.put("pb","128");
+            params.put("apikey","");
+        }else {
+            params.put("type", "n");
+        }
         HttpClientResult result = HttpClientUtils.doGet(SIREN_ZHAOHE_URL, headers, params);
         cookie = HttpClientUtils.getCookie();
         return JSONObject.parseObject(result.getContent());
@@ -103,6 +116,17 @@ public class DoubanRequest {
         System.out.println("收：" + HttpClientUtils.doPost("https://fm.douban.com/j/v2/collect_event", headers, params).getContent());
     }
 
+    public static JSONObject getReadHeartSong() throws IOException, URISyntaxException {
+        headers.put("Cookie",cookie);
+        Map<String,String> params = new HashMap<>();
+        LocalDateTime date3 = LocalDateTime.now();//代替calendar
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        params.put("updated_time",formatter.format(date3));
+        HttpClientResult result = HttpClientUtils.doGet("https://fm.douban.com/j/v2/redheart/basic", headers, params);
+        JSONObject resultObject = JSONObject.parseObject(result.getContent());
+        System.out.println(resultObject);
+        return resultObject;
+    }
     public static boolean isLogined(String code) throws IOException, URISyntaxException {
         //headers.put("Origin", "https://accounts.douban.com");
         headers.put("Cookie", cookie);

@@ -12,6 +12,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import team.ngup.douban.common.cookie.CookieUtil;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -305,9 +306,10 @@ public class HttpClientUtils {
         httpResponse = httpClient.execute(httpMethod);
         for (Header header : httpResponse.getAllHeaders()) {
             if ("Set-Cookie".equals(header.getName())) {
-                cookie += ";" + header.getValue();
+                CookieUtil.addCookie(header.getValue());
             }
         }
+        cookie = CookieUtil.getCookies();
         System.out.println("当前Cookie:" + cookie);
         // 获取返回结果
         if (httpResponse != null && httpResponse.getStatusLine() != null) {
