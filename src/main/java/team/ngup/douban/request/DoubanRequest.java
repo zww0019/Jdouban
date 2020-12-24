@@ -8,9 +8,7 @@ import team.ngup.douban.common.http.HttpClientUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,16 +69,16 @@ public class DoubanRequest {
         headers.put("Cookie", cookie);
         Map<String, String> params = new HashMap<>();
         params.put("channel", "0");
-        params.put("kbps", "128");
+        params.put("kbps", "192");
         params.put("client", "s:mainsite|y:3.0");
         params.put("app_name", "radio_website");
         params.put("version", "100");
         if(StringUtils.isNotEmpty(id)&&StringUtils.isNotEmpty(type)){
             params.put("type",type);
             params.put("sid",id);
-            params.put("pt","");
-            params.put("pb","128");
-            params.put("apikey","");
+            params.put("pt", "");
+            params.put("pb", "192");
+            params.put("apikey", "");
         }else {
             params.put("type", "n");
         }
