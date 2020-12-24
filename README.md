@@ -6,15 +6,15 @@
 
 ### mac os
 
-`command+RIGHT`下一首
-`command+UP`喜欢
-`command+DOWN`取消喜欢
-`command+LEFT`丢到垃圾桶
+- `command+RIGHT`下一首
+- `command+UP`喜欢
+- `command+DOWN`取消喜欢
+- `command+LEFT`丢到垃圾桶
 
 ### win os
 
-`ctrl+RIGHT`下一首
-`ctrl+UP`喜欢
-`ctrl+DOWN`取消喜欢
-`ctrl+LEFT`丢到垃圾桶
+- `ctrl+RIGHT`下一首
+- `ctrl+UP`喜欢
+- `ctrl+DOWN`取消喜欢
+- `ctrl+LEFT`丢到垃圾桶
 
