@@ -4,7 +4,7 @@
 
 ## 使用说明
 
-https://www.kdphoto.cn
+https://www.kdphoto.cn/articles/94
 
 ## 快捷键
 
