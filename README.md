@@ -10,6 +10,7 @@
 - `command+UP`喜欢
 - `command+DOWN`取消喜欢
 - `command+LEFT`丢到垃圾桶
+- `command+ENTER`暂停/继续播放
 
 ### win os
 
@@ -17,4 +18,4 @@
 - `ctrl+UP`喜欢
 - `ctrl+DOWN`取消喜欢
 - `ctrl+LEFT`丢到垃圾桶
-
+- `ctrl+ENTER`暂停/继续播放
