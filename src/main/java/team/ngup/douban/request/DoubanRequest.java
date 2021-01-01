@@ -52,12 +52,15 @@ public class DoubanRequest {
         }
     }
 
-    public static JSONObject getUserInfo() throws IOException {
+    public static JSONObject getUserInfo() throws IOException, URISyntaxException {
         //headers.put("Origin", "https://fm.douban.com");
         headers.put("Cookie", cookie);
+        Map<String, String> newHeader = new HashMap<>();
+        newHeader.putAll(headers);
+        newHeader.put("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
         Map<String, String> params = new HashMap<>();
         params.put("avatar_size", "large");
-        HttpClientResult result = HttpClientUtils.doPost(USER_INFO_URL, headers, params);
+        HttpClientResult result = HttpClientUtils.doGet(USER_INFO_URL, newHeader, params);
         cookie = HttpClientUtils.getCookie();
         //cookie = HttpClientUtils.getCookie();
         //System.out.println("获取用户信息时的cookie:"+cookie);
