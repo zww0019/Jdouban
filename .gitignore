@@ -2,3 +2,6 @@
 /Jdouban.iml
 /target/classes/com/intellij/uiDesigner/core/
 /target/
+/.settings/
+/.classpath
+/.project
